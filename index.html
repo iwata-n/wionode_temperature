@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>温度湿度</title>
+<meta charset="utf-8">
+<meta name="description" content="">
+<meta name="author" content="">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="">
+<link rel="shortcut icon" href="">
+</head>
+<body>
+    <div id="loudness"></div>
+    <div id="humidity"></div>
+    <div id="temperature"></div>
+<!-- Place your content here -->
+<!-- SCRIPTS -->
+<!-- Example: <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script> -->
+<script>
+function requestStart(url) {
+  return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      // ハンドラの登録.
+      xhr.onreadystatechange = () => {
+      switch (xhr.readyState) {
+        case 0:
+          // 未初期化状態.
+          break;
+        case 1: // データ送信中.
+          break;
+        case 2: // 応答待ち.
+          break;
+        case 3: // データ受信中.
+          break;
+        case 4: // データ受信完了.
+          if (xhr.status === 200 || xhr.status === 304) {
+            const data = xhr.responseText; // responseXML もあり
+            resolve(data);
+          } else {
+            reject(xhr.statusText)
+          }
+          break;
+      }
+      };
+      xhr.open('GET', url, false);
+      // POST 送信の場合は Content-Type は固定.
+      xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+      //
+      xhr.send('');
+      xhr.abort(); // 再利用する際にも abort() しないと再利用できないらしい.
+  })
+}
+
+function intervalHandler() {
+  const loudness = document.getElementById("loudness");
+  const humidity = document.getElementById("humidity");
+  const temperature = document.getElementById("temperature");
+
+  /*
+  requestStart('https://us.wio.seeed.io/v1/node/GroveLoudnessA0/loudness?access_token=d76c0cc45cbfbc8c701b5033f7883187')
+      .then(data => loudness.innerHTML = JSON.parse(data)['loudness'])
+  */
+
+  requestStart('https://us.wio.seeed.io/v1/node/GroveTempHumD0/humidity?access_token=d76c0cc45cbfbc8c701b5033f7883187')
+      .then(data => humidity.innerHTML = JSON.parse(data)['humidity'] + '%')
+
+  requestStart('https://us.wio.seeed.io/v1/node/GroveTempHumD0/temperature?access_token=d76c0cc45cbfbc8c701b5033f7883187')
+      .then(data => temperature.innerHTML = JSON.parse(data)['celsius_degree'] + '℃')
+}
+
+(window.onload = () => {
+    intervalHandler();
+    window.setInterval("intervalHandler()", 10000)
+})();
+</script>
+
+</body>
+</html>
